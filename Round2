@@ -1,1 +1,155 @@
+#"Main Solver"
+def solve_sudoku(board):
+    #Step 1: Validate initial board
+    if(not is_board_valid(board)):
+        return False
+        
+    #Step 2: Find first empty cell
+    empty_cell = find_empty(board)
+    
+    # Base case: if no empty cells, puzzle is solved
+    if(empty_cell is None):
+        return True
+        
+    #Step 3: Extract coordinates of empty cell
+    row, col = empty_cell
+    
+    #Step 4: Try numbers 1 through 9
+    for num in range(1,10):
+        #Check if num can be placed at (row, col)
+        if(is_valid(board, num, (row, col))):
+            #Place the number
+            board[row][col] = num
+            
+            #Recursively try to solve the rest
+            if(solve_sudoku(board) is True):
+                return True
+                
+            #If placing num doesn't lead to solution, backtrack
+            board[row][col] = 0  #Reset cell
+            
+    # If no number works, trigger backtracking
+    return False
 
+
+
+#"Board Validation"
+def is_board_valid(board):
+    #Check all pre-filled cells in the board
+    for i in range(0,9):
+        for j in range(0,9):
+            if(board[i][j] != 0):
+                num = board[i][j]
+                
+                #Check row for conflicts (excluding current cell)
+                for col in range(0,9):
+                    if (col != j and board[i][col] == num):
+                        return False
+                
+                #Check column for conflicts (excluding current cell)
+                for row in range(0,9):
+                    if(row != i and board[row][j] == num):
+                        return False
+                
+                # Check 3×3 box for conflicts (excluding current cell)
+                box_row = i // 3  #Integer division
+                box_col = j // 3  #Integer division
+                
+                for r in range((box_row * 3),(box_row * 3 + 3)):
+                    for c in range((box_col * 3), (box_col * 3 + 3)):
+                        if((r != i or c != j) and board[r][c] == num):
+                            return False
+    
+    # All pre-filled cells are valid
+    return True
+
+
+
+#"Move Validation"
+def is_valid(board, num, position):
+    row, col = position
+    
+    # Check row constraint
+    for j in range(0,9):
+        if( board[row][j] == num and j != col):
+            return False
+    
+    # Check column constraint
+    for i in range(0,9):
+        if(board[i][col] == num and i != row):
+            return False
+    
+    # Check 3×3 box constraint
+    box_row = row // 3  #Integer division
+    box_col = col // 3  #Integer division
+    
+    for i in range((box_row * 3),(box_row * 3 + 3)):
+        for j in range((box_col * 3), (box_col * 3 + 3)):
+            if(board[i][j] == num and (i, j) != position):
+                return False
+    
+    # All constraints satisfied
+    return True
+
+
+
+#"Helper Functions"
+def find_empty(board):
+    # Scan the entire 9×9 grid
+    for i in range(0,9):
+        for j in range(0,9):
+            if(board[i][j] == 0):  # 0 represents empty
+                return (i, j)
+    
+    # No empty cells found
+    return None
+
+def print_board(board):
+    for i in range(0,9):
+        #Print horizontal separator after every 3 rows
+        if(i % 3 == 0 and i != 0):
+            print("---------------------")
+        
+        for j in range(0,9):
+            #Print vertical separator after every 3 columns
+            if(j % 3 == 0 and j != 0):
+                print("| ", end="")
+            
+            #Print cell value (dot for empty)
+            if(board[i][j] == 0):
+                print(". ", end="")
+            else:
+                print(board[i][j] ," ", end="")
+        
+        print()  
+        #Move to next row
+
+
+
+#"Main Execution Flow"
+#Step 1: Define the unsolved Sudoku puzzle
+unsolved_sudoku = [
+    [0, 0, 0, 0, 4, 0, 0, 2, 6],
+    [3, 0, 9, 7, 2, 0, 0, 0, 0],
+    [0, 5, 0, 0, 0, 0, 4, 0, 0],
+    [0, 0, 7, 9, 1, 3, 0, 0, 0],
+    [6, 0, 3, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 2],
+    [1, 0, 0, 0, 0, 0, 0, 8, 0],
+    [0, 0, 0, 0, 0, 8, 0, 0, 9],
+    [0, 9, 0, 0, 0, 0, 7, 0, 4]
+]
+
+#Step 2: Display the unsolved puzzle
+print("Unsolved Sudoku:")
+print_board(unsolved_sudoku)
+
+#Step 3: Attempt to solve
+if(solve_sudoku(unsolved_sudoku) is True):
+    print("\nSolved Sudoku:")
+    print_board(unsolved_sudoku)
+else:
+    print("\nNo solution exists (puzzle may be invalid or unsolvable).")
+
+#Step 4: Display the solved puzzle
+solve_sudoku(unsolved_sudoku)    
